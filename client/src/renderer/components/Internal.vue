@@ -157,8 +157,6 @@
         </template>
       </el-table-column>
       <el-table-column prop="operator" label="收费员"></el-table-column>
-      <el-table-column label="" width="80">
-      </el-table-column>
       <el-table-column label="外站免费记录">
         <template scope="scope">
           <el-popover v-if="compareResult[scope.$index]" placement="right" title="详情" width="300" trigger="hover">

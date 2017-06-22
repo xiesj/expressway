@@ -10,4 +10,5 @@ selenium-debug.log
 
 .idea/
 app/platforms/
+app/www/
 client/build/
