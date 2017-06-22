@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html xmlns:v-on="http://www.w3.org/1999/xhtml" xmlns:v-bind="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="UTF-8">
+  <title>播音员</title>
+  <script src="./vue.js"></script>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<div id="app" v-cloak>
+  <button v-on:click="add">添加</button>
+  <ul id="events-list" class="events-list">
+    <li v-for="(ev, index) in events">
+      <span class="content">{{ ev.content }}</span>
+      <div class="operation">
+        <button v-on:click="playSound(ev.soundFile)">播放</button>
+        <button v-on:click="edit(ev)">编辑</button>
+        <button v-on:click="remove(index)">删除</button>
+      </div>
+      <div class="loop">
+        <span v-if="ev.startDate.length">{{ev.startDate}}开始; </span>
+        <span v-if="ev.endDate.length">{{ev.endDate}}结束; </span>
+        <span v-if="ev.months.length">按月{{ev.months}}; </span>
+        <span v-if="ev.dates.length">按天{{ev.dates}}; </span>
+        <span v-if="ev.days.length">按星期{{ev.days}}; </span>
+        <span v-if="ev.hours.length">按小时{{ev.hours}}; </span>
+        <span v-if="ev.minutes.length">按分钟{{ev.minutes}};</span>
+      </div>
+    </li>
+  </ul>
+  <div id="new-event-form" class="new-event-form" v-if="adding || editing">
+    期限
+    <input class="new-event-start-date" type="date" v-model="newEvent.startDate">
+    至
+    <input class="new-event-end-date" type="date" v-model="newEvent.endDate">
+    <div class="new-event-selectors">
+      <div class="new-event-selector">
+        <label>按月</label>
+        <br>
+        <select v-model="newEvent.months" multiple>
+          <template v-for="n in 12">
+            <option v-bind:value="n">{{n}}月</option>
+          </template>
+        </select>
+      </div>
+      <div class="new-event-selector">
+        <label>按天</label>
+        <br>
+        <select v-model="newEvent.dates" multiple>
+          <template v-for="n in 31">
+            <option v-bind:value="n">{{n}}日</option>
+          </template>
+        </select>
+      </div>
+      <div class="new-event-selector">
+        <label>按星期</label>
+        <br>
+      <select v-model="newEvent.days" multiple>
+        <template v-for="(day, n) in ['一','二','三','四','五','六','天']">
+          <option v-bind:value="n+1">星期{{day}}</option>
+        </template>
+      </select>
+    </div>
+    <div class="new-event-selector">
+      <label>按小时</label>
+      <br>
+      <select v-model="newEvent.hours" multiple>
+        <template v-for="n in 24">
+          <option v-bind:value="n-1">{{n-1}}点</option>
+        </template>
+      </select>
+    </div>
+    <div class="new-event-selector">
+      <label>按分钟</label>
+      <br>
+      <select v-model="newEvent.minutes" multiple>
+        <template v-for="n in 30">
+          <option v-bind:value="n-1">{{n-1}}分</option>
+        </template>
+      </select>
+      <select v-model="newEvent.minutes2" multiple>
+      <template v-for="n in 30">
+        <option v-bind:value="30+n-1">{{30+n-1}}分</option>
+      </template>
+    </select>
+    </div>
+  </div>
+  <textarea class="new-event-content" v-model="newEvent.content" placeholder="播音内容"></textarea>
+  <button v-on:click="save" v-bind:disabled="!newEvent.content.length">保存</button>
+  <button v-on:click="close">取消</button>
+</div>
+</div>
+</body>
+
+<script>
+    const fs = require('fs')
+    const request = require('request')
+    const dataFile = __dirname + '/data/data.json'
+    const _ = require('lodash')
+    const uuid = require('uuid')
+
+    function getStoredEvents() {
+        if(fs.existsSync(dataFile)) {
+            var dataString = fs.readFileSync(dataFile, 'utf8')
+            if(dataString) {
+                var data = JSON.parse(dataString)
+                if(data){
+                    return data
+                }
+            }
+        }
+        return []
+    }
+
+    function saveEvents(data) {
+        fs.writeFileSync(dataFile, JSON.stringify(data), 'utf8')
+    }
+
+    function downloadSound(text) {
+        return new Promise(function(resolve, reject) {
+            var uri = 'http://fanyi.baidu.com/gettts?lan=zh&text='+encodeURIComponent(text)+'&spd=5&source=web'
+            var soundFile = __dirname + '/data/' + (new Date().getTime()) + '.mp3'
+            var stream = fs.createWriteStream(soundFile)
+            request(uri).pipe(stream).on('close', function () {
+                if(fs.existsSync(soundFile)) {
+                    resolve(soundFile)
+                }else{
+                    reject('download fail')
+                }
+            })
+        })
+
+    }
+
+    var eventEntity = function () {
+        return {
+            id: uuid()
+            , content: ''
+            , soundFile: ''
+            , startDate: ''
+            , endDate: ''
+            , months: []
+            , dates: []
+            , days: []
+            , hours: []
+            , minutes: []
+            , minutes2: []
+        }
+    }
+
+    var app = new Vue({
+        el: '#app'
+        , data: {
+            events: getStoredEvents()
+            , adding: false
+            , editing: false
+            , newEvent: eventEntity()
+        }
+        , computed: {
+
+        }
+        , methods: {
+            add: function () {
+                Promise.resolve()
+                    .then(function () {
+                    return 1
+                }.bind(this))
+                this.newEvent = eventEntity()
+                this.adding = true
+            }
+            , save: function () {
+                if(this.newEvent.content){
+                    Promise.resolve()
+                        .then(function () {
+                            if(this.editing && this.newEvent.content == this.editing.content){
+                                return this.editing.soundFile
+                            }else{
+                                this.removeSound(this.newEvent.soundFile)
+                                return downloadSound(this.newEvent.content)
+                            }
+                        }.bind(this))
+                        .then(function (soundFile) {
+                            this.newEvent.soundFile = soundFile
+                            if(this.adding) {
+                                this.newEvent.id = uuid()
+                                this.events.push(this.newEvent)
+                            }else{
+                                for(i in this.events){
+                                    if(this.events[i].id == this.newEvent.id){
+                                        this.events[i] = this.newEvent
+                                    }
+                                }
+                            }
+                            saveEvents(this.events)
+                            this.newEvent = eventEntity()
+                            this.editing = false
+                            this.adding = false
+                        }.bind(this))
+                }
+            }
+            , edit: function (ev) {
+                this.editing = ev
+                this.newEvent = _.clone(ev)
+            }
+            , close: function () {
+                this.adding = false
+                this.editing = false
+            }
+            , remove: function (index) {
+                var removedEvent = this.events.splice(index, 1)
+                this.removeSound(removedEvent[0].soundFile)
+                saveEvents(this.events)
+            }
+            , removeSound: function (soundFile) {
+                if(fs.existsSync(soundFile)){
+                  fs.unlinkSync(soundFile)
+                }
+            }
+            , playSound: function (soundFile) {
+                new Audio(soundFile).play()
+            }
+        }
+    })
+
+    function checkNow() {
+        var date = new Date()
+        for(index in app.events){
+            var ev = app.events[index]
+            var loop = false
+            if(ev.startDate){
+                var startDate = new Date(ev.startDate + ' 00:00:00')
+                if(startDate.getTime() > date.getTime()){
+                    return
+                }
+                loop = true
+            }
+            if(ev.endDate){
+                var endDate = new Date(ev.endDate + ' 00:00:00')
+                if(endDate.getTime() < date.getDate()){
+                    return
+                }
+                loop = true
+            }
+            if(ev.months){
+                if(ev.months.indexOf((date.getMonth()+1)+'') < 0){
+                    return
+                }
+                loop = true
+            }
+            if(ev.dates){
+                if(ev.dates.indexOf((date.getDate())+'') < 0){
+                    return
+                }
+                loop = true
+            }
+            if(ev.days){
+                if(ev.days.indexOf((date.getDay())+'') < 0){
+                    return
+                }
+                loop = true
+            }
+            if(ev.hours){
+                if(ev.hours.indexOf((date.getHours())+'') < 0){
+                    return
+                }
+                loop = true
+            }
+            if(ev.minutes || ev.minutes2){
+                if(ev.minutes.indexOf((date.getMinutes())+'') < 0 && ev.minutes2.indexOf((date.getMinutes())+'') < 0){
+                    return
+                }
+                loop = true
+            }
+            if(loop) {
+                app.playSound(ev.soundFile)
+            }
+        }
+    }
+
+    setInterval(function () {
+        checkNow()
+    }, 1000 * 60)
+
+    checkNow()
+</script>
+</body>
+</html>

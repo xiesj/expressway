@@ -1,0 +1,50 @@
+body{
+    margin: 0;
+    padding: 0;
+}
+[v-cloak] {
+    display: none;
+}
+.new-event-form{
+    padding: 10px 10px;
+    font-size: 12px;
+    background: #fff;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+.new-event-content{
+    width: 609px;
+    height: 40px;
+}
+.new-event-selector{
+    float: left;
+    margin-right: 3px;
+}
+.new-event-selector select{
+    width: 100px;
+    height: 400px;
+}
+.events-list{
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+}
+.events-list li{
+    background: rgba(183, 233, 246, 1);
+    padding: 5px 10px;
+}
+.events-list .content{
+    line-height: 30px;
+}
+.events-list li:nth-child(even){
+    background: #EEE;
+}
+.operation{
+    float: right;
+}
+.loop{
+    font-size: 12px;
+}

@@ -1,0 +1,4 @@
+{
+  "dbPath": "mongodb://localhost/expressway",
+  "port": 60100
+}
