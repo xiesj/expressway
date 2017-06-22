@@ -15,7 +15,7 @@
         <el-col :span="6"></el-col>
       </el-row>
     </div>
-    <el-table class="data-table" :data="list" :height="584" v-loading.body="loading" border>
+    <el-table class="data-table" :data="list" :height="584" :width="1190" v-loading.body="loading" border>
       <el-table-column label="车牌">
         <template scope="scope">
           <el-popover placement="right" title="详情" width="300" trigger="hover">

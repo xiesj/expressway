@@ -38,7 +38,7 @@
     width: 200px;
   }
   .data-table {
-    width: 100%;
+    width: 1190px;
     height: 584px;
   }
 </style>

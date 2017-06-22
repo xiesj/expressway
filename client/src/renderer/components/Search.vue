@@ -4,7 +4,7 @@
       <el-input class="search-plate" placeholder="输入车牌号数字后三位" icon="search" v-model="searchPlate"
                 @change="handleSearch" :on-icon-click="handleSearch"></el-input>
     </div>
-    <el-table class="data-table" :data="list" :height="584" v-loading.body="loading" border>
+    <el-table class="data-table" :data="list" :height="584" :width="1190" v-loading.body="loading" border>
       <el-table-column label="车牌">
         <template scope="scope">
           <el-popover placement="right" title="详情" width="300" trigger="hover">
