@@ -10,7 +10,7 @@
         "spec": ">=1.0.0 <2.0.0",
         "type": "range"
       },
-      "/Users/alan/projects/electron/green-channel/app/node_modules"
+      "/Users/alan/projects/expressway/app/node_modules"
     ]
   ],
   "_cnpm_publish_time": 1488934528219,
@@ -47,7 +47,7 @@
   "_shasum": "5b6335feb9f5301f3c013b9096cb8885bdbd5076",
   "_shrinkwrap": null,
   "_spec": "cordova-plugin-whitelist@1",
-  "_where": "/Users/alan/projects/electron/green-channel/app/node_modules",
+  "_where": "/Users/alan/projects/expressway/app/node_modules",
   "author": {
     "name": "Apache Software Foundation"
   },

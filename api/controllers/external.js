@@ -16,10 +16,6 @@ router.post('/search', function (req, res, next) {
   }
 
   var searchCondition = {
-    operationTime: {
-      '$gte': moment().subtract(24, 'hour'),
-      '$lt': moment()
-    }
   }
 
   if (req.body.plate.match(/^\d+$/)) {
@@ -28,7 +24,7 @@ router.post('/search', function (req, res, next) {
     searchCondition.plateId = req.body.plate
   }
 
-  External.find(searchCondition).limit(20)
+  External.find(searchCondition).sort({operationTime: -1}).limit(30)
     .then(function (result) {
       return res.send({
         'list': result
@@ -57,10 +53,22 @@ router.post('/list', function (req, res, next) {
     }
   }
 
-  External.find(searchCondition).limit(20)
+  const limit = 20
+  var skip = 0
+  if (req.body.page) {
+    skip = (parseInt(req.body.page) - 1) * limit
+  }
+
+  var total = 0
+  External.count(searchCondition)
+    .then(function (count) {
+      total = count
+      return External.find(searchCondition).sort({'operationTime': -1}).limit(limit).skip(skip)
+    })
     .then(function (result) {
       return res.send({
-        'list': result
+        list: result,
+        total: total
       })
     })
     .then(null, function (err) {
@@ -110,7 +118,7 @@ router.post('/import', function (req, res, next) {
           var workShiftName = getValue(sheet, 'A', 3)
           var firstColumnTitle = getValue(sheet, 'A', 4)
           if (workShiftName && firstColumnTitle === '电子照片编号') {
-            var matches = workShiftName.replace(/\s/g, '').match(/班次(.*?(\d+)年(\d+)月(\d+)日(.*?)时)至/)
+            var matches = workShiftName.replace(/\s/g, '').match(/班次：(.*?(\d+)年(\d+)月(\d+)日(.*?)时)至/)
             if (matches) {
               var workShift = matches[1]
               var year = parseInt(matches[2])
@@ -144,7 +152,8 @@ router.post('/import', function (req, res, next) {
                   enterStation: getValue(sheet, 'C', n),
                   exitStation: getValue(sheet, 'D', n),
                   category: getValue(sheet, 'E', n),
-                  operationTime: getValue(sheet, 'F', n),
+                  origOperationTime: getValue(sheet, 'F', n),
+                  operationTime: null,
                   freeAmount: getValue(sheet, 'G', n),
                   operator: getValue(sheet, 'H', n),
                   supervisor: getValue(sheet, 'I', n),
@@ -154,8 +163,8 @@ router.post('/import', function (req, res, next) {
                   importSheetName: sheetName
                 }
                 if (entity.pictureId && entity.plateId && entity.enterStation && entity.exitStation && entity.category &&
-                  entity.operationTime && entity.freeAmount && entity.operator && entity.supervisor && entity.leader) {
-                  var operationTimeMatches = entity.operationTime.match(/(\d+?)\D*?(\d+?)/)
+                  entity.origOperationTime && entity.freeAmount && entity.operator && entity.supervisor && entity.leader) {
+                  var operationTimeMatches = entity.origOperationTime.match(/^(\d*)\D(\d*)$/)
                   if (operationTimeMatches) {
                     var ohour = operationTimeMatches[1]
                     var omin = operationTimeMatches[2]

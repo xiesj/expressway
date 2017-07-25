@@ -41,4 +41,7 @@
     width: 1190px;
     height: 584px;
   }
+  .pagination {
+    margin-top: 5px;
+  }
 </style>

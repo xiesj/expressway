@@ -15,7 +15,7 @@
         <el-col :span="6"></el-col>
       </el-row>
     </div>
-    <el-table class="data-table" :data="list" :height="584" :width="1190" v-loading.body="loading" border>
+    <el-table class="data-table" :data="list" :height="550" :width="1190" v-loading.body="loading" border>
       <el-table-column prop="plateId" label="车牌">
         <template scope="scope">
           <el-popover placement="right" title="详情" width="500" trigger="hover">
@@ -229,6 +229,13 @@
         </template>
       </el-table-column>
     </el-table>
+    <el-pagination class="pagination"
+                   @current-change="handleCurrentChange"
+                   :current-page="page"
+                   :page-size="20"
+                   layout="total, prev, pager, next, jumper"
+                   :total="total">
+    </el-pagination>
   </div>
 </template>
 
@@ -241,6 +248,8 @@
         searchDate: '',
         searchPlate: '',
         list: [],
+        total: 0,
+        page: 1,
         compareResult: [],
         loading: false,
         editFormDialogVisible: false,
@@ -259,16 +268,22 @@
       loadList () {
         this.loading = true
         this.$http.post(Config.api + '/internal/list', {
+          page: this.page,
           date: this.searchDate,
           plate: this.searchPlate
         })
           .then(resp => {
             this.loading = false
             this.list = resp.data.list
+            this.total = resp.data.total
             this.compareResult = resp.data.compareResult
           })
       },
       handleSearch () {
+        this.loadList()
+      },
+      handleCurrentChange (val) {
+        this.page = val
         this.loadList()
       },
       handleDetail (index, row) {

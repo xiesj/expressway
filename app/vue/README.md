@@ -1,6 +1,6 @@
-# src
+# vue
 
-> cordova vue src
+> A Vue.js project
 
 ## Build Setup
 

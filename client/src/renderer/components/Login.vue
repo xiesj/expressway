@@ -1,40 +1,19 @@
 <template>
   <div id="login-wrapper">
     <img id="logo" src="~@/assets/logo.png">
-    <main>
-      <div class="left-side">
-        <div class="items">
-          <div class="item">
-            <div class="name">科学</div>
-            <div class="value"></div>
-          </div>
-          <div class="item">
-            <div class="name">合理</div>
-            <div class="value"></div>
-          </div>
-          <div class="item">
-            <div class="name">管用</div>
-            <div class="value"></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="right-side">
-        <div class="login-form">
-          <el-form :label-position="'top'" :model="loginForm" :rules="loginFormRules" ref="loginForm" label-width="100px" class="demo-ruleForm">
-            <el-form-item label="工号" prop="id">
-              <el-input type="text" v-model="loginForm.id" auto-complete="off"></el-input>
-            </el-form-item>
-            <el-form-item label="密码" prop="password">
-              <el-input type="password" v-model="loginForm.password" @keyup.enter.native="submitForm('loginForm')" auto-complete="off"></el-input>
-            </el-form-item>
-            <el-form-item>
-              <el-button type="primary" @click="submitForm('loginForm')">登录</el-button>
-            </el-form-item>
-          </el-form>
-        </div>
-      </div>
-    </main>
+    <div class="login-form">
+      <el-form :label-position="'top'" :model="loginForm" :rules="loginFormRules" ref="loginForm" label-width="100px" class="demo-ruleForm">
+        <el-form-item label="工号" prop="id">
+          <el-input type="text" v-model="loginForm.id" auto-complete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="密码" prop="password">
+          <el-input type="password" v-model="loginForm.password" @keyup.enter.native="submitForm('loginForm')" auto-complete="off"></el-input>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="submitForm('loginForm')">登录</el-button>
+        </el-form-item>
+      </el-form>
+    </div>
   </div>
 </template>
 
@@ -130,6 +109,7 @@
         rgba(255, 255, 255, 1) 40%,
         rgba(229, 229, 229, .9) 100%
       );
+    text-align: center;
     padding: 60px 80px;
     width: 100vw;
     height: 100vh;
@@ -139,13 +119,6 @@
     height: auto;
     margin-bottom: 20px;
   }
-
-  main {
-    display: flex;
-    justify-content: space-between;
-  }
-
-  main > div { flex-basis: 50%; }
 
   .left-side {
     display: flex;
@@ -159,7 +132,9 @@
   }
 
   .login-form {
-    margin-top: 20px;
+    margin: 20px auto;
+    text-align: center;
+    width: 400px;
   }
 
   .title {

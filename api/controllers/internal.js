@@ -35,7 +35,18 @@ router.post('/list', function (req, res, next) {
     }
   }
 
-  Internal.find(searchCondition).limit(20)
+  const limit = 20
+  var skip = 0
+  if (req.body.page) {
+    skip = (parseInt(req.body.page) - 1) * limit
+  }
+
+  var total = 0
+  Internal.count(searchCondition)
+    .then(function (count) {
+      total = count
+      return Internal.find(searchCondition).sort({exitTime: -1}).limit(limit).skip(skip)
+    })
     .then(function (result) {
       if (result && result.length) {
         var compareQuery = []
@@ -45,8 +56,9 @@ router.post('/list', function (req, res, next) {
         Promise.all(compareQuery)
           .then(function (compareResult) {
             return res.send({
-              'list': result,
-              'compareResult': compareResult
+              compareResult: compareResult,
+              list: result,
+              total: total
             })
           })
       } else {

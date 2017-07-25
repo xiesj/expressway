@@ -9,6 +9,7 @@ module.exports = (function () {
     enterStation: {type: String}, // 入口站
     exitStation: {type: String}, // 出口站
     category: {type: String}, // 货物种类代码
+    origOperationTime: {type: String}, // 原始操作时间
     operationTime: {type: Date, index: true, required: true}, // 操作时间
     freeAmount: {type: Number}, // 免费金额
     operator: {type: String}, // 验货人员

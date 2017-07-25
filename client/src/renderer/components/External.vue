@@ -15,13 +15,21 @@
         <el-col :span="6"></el-col>
       </el-row>
     </div>
-    <el-table class="data-table" :data="list" :height="584" :width="1190" v-loading.body="loading" border>
+    <el-table class="data-table" :data="list" :height="550" :width="1190" v-loading.body="loading" border>
       <el-table-column label="车牌">
         <template scope="scope">
           <el-popover placement="right" title="详情" width="300" trigger="hover">
             <el-row>
+              <el-col :span="8">操作时间</el-col>
+              <el-col :span="16">{{scope.row.operationTime | date}}</el-col>
+            </el-row>
+            <el-row>
               <el-col :span="8">班次</el-col>
               <el-col :span="16">{{scope.row.workShift}}</el-col>
+            </el-row>
+            <el-row>
+              <el-col :span="8">原始操作时间</el-col>
+              <el-col :span="16">{{scope.row.origOperationTime}}</el-col>
             </el-row>
             <el-row>
               <el-col :span="8">电子照片编号</el-col>
@@ -42,10 +50,6 @@
             <el-row>
               <el-col :span="8">货物种类</el-col>
               <el-col :span="16">{{scope.row.category}}</el-col>
-            </el-row>
-            <el-row>
-              <el-col :span="8">操作时间</el-col>
-              <el-col :span="16">{{scope.row.operationTime | date}}</el-col>
             </el-row>
             <el-row>
               <el-col :span="8">免费金额</el-col>
@@ -97,6 +101,13 @@
       <el-table-column prop="freeAmount" label="免费金额"></el-table-column>
       <el-table-column prop="operator" label="验货员"></el-table-column>
     </el-table>
+    <el-pagination class="pagination"
+      @current-change="handleCurrentChange"
+      :current-page="page"
+      :page-size="20"
+      layout="total, prev, pager, next, jumper"
+      :total="total">
+    </el-pagination>
   </div>
 </template>
 
@@ -110,6 +121,8 @@
         searchPlate: '',
         loading: false,
         list: [],
+        total: 0,
+        page: 1,
         editFormDialogVisible: false,
         editFormLabelWidth: '50px',
         editForm: {
@@ -126,15 +139,21 @@
       loadList () {
         this.loading = true
         this.$http.post(Config.api + '/external/list', {
+          page: this.page,
           date: this.searchDate,
           plate: this.searchPlate
         })
           .then(resp => {
             this.list = resp.data.list
+            this.total = resp.data.total
             this.loading = false
           })
       },
       handleSearch () {
+        this.loadList()
+      },
+      handleCurrentChange (val) {
+        this.page = val
         this.loadList()
       },
       handleDetail (index, row) {
