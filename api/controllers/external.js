@@ -73,7 +73,6 @@ router.post('/list', function (req, res, next) {
       return External.aggregate(aggregates).exec()
     })
     .then(function (result) {
-      console.log(result)
       return res.send({
         list: result,
         total: total

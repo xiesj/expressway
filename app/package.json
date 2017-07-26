@@ -5,7 +5,9 @@
     "description": "调整公路绿通车查询",
     "main": "index.js",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "dev": "cd vue && yarn dev",
+        "build": "cordova build android"
     },
     "author": "Resnn",
     "license": "Apache-2.0",

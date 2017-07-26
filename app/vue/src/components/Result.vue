@@ -101,13 +101,13 @@
     font-size: 14px;
   }
   .success {
-    background: green;
+    background: #008000;
   }
   .warning {
-    background: yellow;
+    background: #ff9900;
   }
   .danger {
-    background: red;
+    background: #ff0000;
   }
   .operation-time{
     text-align: center;
