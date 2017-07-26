@@ -59,13 +59,21 @@ router.post('/list', function (req, res, next) {
     skip = (parseInt(req.body.page) - 1) * limit
   }
 
+  var aggregates = [
+    {'$match': searchCondition},
+    {'$sort': { 'operationTime': -1 }},
+    {'$skip': skip},
+    {'$limit': limit}
+  ]
+
   var total = 0
   External.count(searchCondition)
     .then(function (count) {
       total = count
-      return External.find(searchCondition).sort({'operationTime': -1}).limit(limit).skip(skip)
+      return External.aggregate(aggregates).exec()
     })
     .then(function (result) {
+      console.log(result)
       return res.send({
         list: result,
         total: total
@@ -125,12 +133,12 @@ router.post('/import', function (req, res, next) {
               var month = parseInt(matches[3])
               var day = parseInt(matches[4])
               var time = matches[5]
-              var timeMatches = time.match(/(\d+?)\D*?(\d+?)?/)
+              var timeMatches = time.match(/^(\d+)(\D(\d+))?$/)
               var hour = time
               var min = 0
               if (timeMatches) {
                 hour = parseInt(timeMatches[1])
-                min = parseInt(timeMatches[2]) || 0
+                min = parseInt(timeMatches[3]) || 0
               }
               var workShiftTime = moment([year, month - 1, day, hour, min])
               for (var n = 5; n < 65535; n++) {

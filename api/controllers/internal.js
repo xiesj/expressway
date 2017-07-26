@@ -41,11 +41,18 @@ router.post('/list', function (req, res, next) {
     skip = (parseInt(req.body.page) - 1) * limit
   }
 
+  var aggregates = [
+    {'$match': searchCondition},
+    {'$sort': { 'exitTime': -1 }},
+    {'$skip': skip},
+    {'$limit': limit}
+  ]
+
   var total = 0
   Internal.count(searchCondition)
     .then(function (count) {
       total = count
-      return Internal.find(searchCondition).sort({exitTime: -1}).limit(limit).skip(skip)
+      return Internal.aggregate(aggregates).exec()
     })
     .then(function (result) {
       if (result && result.length) {
