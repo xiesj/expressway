@@ -11,22 +11,27 @@
         <span class="operation-hour" v-bind:class="row.operationTime | diffHourColor">{{ row.operationTime | diffHour}}</span>
       </cell>
       <div class="slide" :class="activeCell == index ? 'animate' : ''">
-        <group class="padding: 15px">
-          <cell title="操作时间">{{row.operationTime | date}}</cell>
-          <cell title="班次">{{row.workShift}}</cell>
-          <cell title="电子照片编号">{{row.pictureId}}</cell>
-          <cell title="车牌照号">{{row.plateId}}</cell>
+        <group>
+          <cell title="货物名称">{{row.category}}</cell>
+          <cell title="免费金额">{{row.freeAmount}}</cell>
           <cell title="入口站">{{row.enterStation}}</cell>
           <cell title="出口站">{{row.exitStation}}</cell>
-          <cell title="货物种类代码">{{row.category}}</cell>
-          <cell title="免费金额">{{row.freeAmount}}</cell>
-          <cell title="验货人员">{{row.operator}}</cell>
-          <cell title="监控员">{{row.supervisor}}</cell>
-          <cell title="值班站领导">{{row.leader}}</cell>
           <cell title="数据导入员">{{row.importer}}</cell>
           <cell title="文件名">{{row.importFileName}}</cell>
           <cell title="表名">{{row.importSheetName}}</cell>
-          <cell title="导入时间">{{row.importTime | date}}</cell>
+          <cell>
+            <span v-show="row.confirmBy">已被{{row.confirmBy}}确认</span>
+            <x-button v-show="!row.confirmBy" type="primary" @click.native="confirm(row, index)">确认</x-button>
+          </cell>
+
+          <!--<cell title="操作时间">{{row.operationTime | date}}</cell>-->
+          <!--<cell title="班次">{{row.workShift}}</cell>-->
+          <!--<cell title="电子照片编号">{{row.pictureId}}</cell>-->
+          <!--<cell title="车牌照号">{{row.plateId}}</cell>-->
+          <!--<cell title="验货人员">{{row.operator}}</cell>-->
+          <!--<cell title="监控员">{{row.supervisor}}</cell>-->
+          <!--<cell title="值班站领导">{{row.leader}}</cell>-->
+          <!--<cell title="导入时间">{{row.importTime | date}}</cell>-->
         </group>
       </div>
     </template>
@@ -83,6 +88,24 @@
             this.$router.push('/search')
           }, 3000)
         }
+      },
+      confirm (row, index) {
+        this.$vux.loading.show({
+          text: '正在提交'
+        })
+        this.$http.post(Config.api + '/external/confirm', {
+          id: row._id
+        }).then((resp) => {
+          this.$vux.loading.hide()
+          if (resp && resp.data && resp.data.ok) {
+            row.confirmBy = resp.data.confirmBy
+            row.confirmAt = resp.data.confirmAt
+            this.$set(this.list, index, row)
+            this.$vux.toast.text('确认成功')
+          } else {
+            this.$vux.toast.text('确认失败请检查网络重试')
+          }
+        })
       }
     },
     mounted () {

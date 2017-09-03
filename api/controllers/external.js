@@ -40,6 +40,33 @@ router.post('/search', function (req, res, next) {
     })
 })
 
+router.post('/confirm', function (req, res, next) {
+  if (!req.body.id) {
+    return res.send({
+      'error': 'CONFIRM_EXTERNAL_MISSING_ID'
+    })
+  }
+  if (!req.session.user || !req.session.user.name) {
+    return res.send({
+      'error': 'CONFIRM_EXTERNAL_MISSING_USER'
+    })
+  }
+
+  var confirmAt = Date.now()
+
+  External.update({_id: req.body.id}, {confirmBy: req.session.user.name, confirmAt: confirmAt}).sort({operationTime: -1}).limit(30)
+    .then(function (result) {
+      result.confirmBy = req.session.user.name
+      result.confirmAt = confirmAt
+      return res.send(result)
+    })
+    .then(null, function (err) {
+      return res.send({
+        'error': err
+      })
+    })
+})
+
 router.post('/list', function (req, res, next) {
   var searchCondition = {}
   if (req.body.date) {
