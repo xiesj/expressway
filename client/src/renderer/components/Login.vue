@@ -4,7 +4,7 @@
     <div class="login-form">
       <el-form :label-position="'top'" :model="loginForm" :rules="loginFormRules" ref="loginForm" label-width="100px" class="demo-ruleForm">
         <el-form-item label="工号" prop="id">
-          <el-input type="text" v-model="loginForm.id" auto-complete="off"></el-input>
+          <el-input type="number" v-model="loginForm.id" auto-complete="off"></el-input>
         </el-form-item>
         <el-form-item label="密码" prop="password">
           <el-input type="password" v-model="loginForm.password" @keyup.enter.native="submitForm('loginForm')" auto-complete="off"></el-input>

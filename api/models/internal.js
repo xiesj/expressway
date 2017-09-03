@@ -17,7 +17,8 @@ module.exports = (function () {
     payType: {type: String}, // 车情
     situation: {type: String}, // 特情
     plateId: {type: String, index: true, required: true}, // 车牌号
-    plateNumber: {type: String, index: true}, // 车牌号数字
+    plateAllNumber: {type: String, index: true}, // 车牌号数字
+    plateNumber: {type: String, index: true}, // 车牌号数字后三位
     plateColor: {type: String}, // 车牌颜色
     autoPlateId: {type: String}, // 自动车牌
     totalWeight: {type: String}, // 总重

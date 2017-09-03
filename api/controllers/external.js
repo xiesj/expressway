@@ -16,10 +16,13 @@ router.post('/search', function (req, res, next) {
   }
 
   var searchCondition = {
+    operationTime: {
+      '$gte': moment().subtract(1, 'days')
+    }
   }
 
   if (req.body.plate.match(/^\d+$/)) {
-    searchCondition.plateNumber = req.body.plate
+    searchCondition.plateNumber = new RegExp('.*' + req.body.plate + '.*')
   } else {
     searchCondition.plateId = req.body.plate
   }
@@ -145,16 +148,19 @@ router.post('/import', function (req, res, next) {
                 if (!plateId) {
                   break
                 }
+                var plateAllNumber = ''
                 var plateNumber = ''
                 var plateIdMatches = plateId.match(/\d/g)
                 if (plateIdMatches) {
-                  plateNumber = plateIdMatches.join('').substr(-3)
+                  plateAllNumber = plateIdMatches.join('')
+                  plateNumber = plateAllNumber.substr(-3)
                 }
                 var entity = {
                   hash: null, // 唯一识别码 (plateId-operationTime)
                   workShift: workShift,
                   pictureId: getValue(sheet, 'A', n),
                   plateId: plateId,
+                  plateAllNumber: plateAllNumber,
                   plateNumber: plateNumber,
                   enterStation: getValue(sheet, 'C', n),
                   exitStation: getValue(sheet, 'D', n),

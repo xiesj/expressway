@@ -5,7 +5,8 @@ module.exports = (function () {
     workShift: {type: String}, // 班次
     pictureId: {type: String}, // 电子照片编号
     plateId: {type: String, index: true, required: true}, // 车牌照号
-    plateNumber: {type: String, index: true, required: true}, // 车牌照号数字
+    plateAllNumber: {type: String, index: true, required: true}, // 车牌照号数字
+    plateNumber: {type: String, index: true, required: true}, // 车牌照号数字后三位
     enterStation: {type: String}, // 入口站
     exitStation: {type: String}, // 出口站
     category: {type: String}, // 货物种类代码

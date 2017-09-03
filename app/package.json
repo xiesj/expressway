@@ -7,7 +7,8 @@
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
         "dev": "cd vue && yarn dev",
-        "build": "cordova build android"
+        "build": "cd vue && node build/build.js",
+        "android": "cd vue && node build/build.js && cd .. && cordova run android"
     },
     "author": "Resnn",
     "license": "Apache-2.0",

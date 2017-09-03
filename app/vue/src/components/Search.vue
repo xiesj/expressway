@@ -34,7 +34,8 @@
         gridItemStyle: {
           height: document.body.clientWidth / 3 + 'px',
           lineHeight: document.body.clientWidth / 3 + 'px'
-        }
+        },
+        backTimer: null
       }
     },
     methods: {
@@ -59,8 +60,23 @@
       }
     },
     mounted () {
+      document.addEventListener('backbutton', () => {
+        if (this.$route.path === '/search') {
+          if (!this.backTimer) {
+            this.$vux.toast.text('再次按下后退, 退出登录')
+            this.backTimer = setTimeout(() => {
+              this.backTimer = null
+            }, 2000)
+          } else {
+            this.backTimer = null
+            this.$vux.toast.hide()
+            this.$router.push('/')
+          }
+        }
+      }, false)
     }
   }
+
 </script>
 <style scoped>
   .weui-grid, .weui-cell {

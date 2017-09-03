@@ -5,8 +5,8 @@
       <h1> </h1>
     </div>
     <group title="登录">
-      <x-input title="工号" v-model="id" required></x-input>
-      <x-input title="密码" v-model="password" type="password" required></x-input>
+      <x-input title="工号" type="number" v-model="id" required></x-input>
+      <x-input title="密码" type="password" v-model="password" required></x-input>
     </group>
     <div style="padding:15px;">
       <x-button plain type="primary" @click.native="submitForm">登录</x-button>
@@ -49,6 +49,13 @@ export default {
         this.$vux.toast.text('工号和密码不能为空')
       }
     }
+  },
+  mounted () {
+    document.addEventListener('backbutton', () => {
+      if (this.$route.path === '/') {
+        return false
+      }
+    }, false)
   }
 }
 </script>

@@ -130,6 +130,7 @@ router.post('/import', function (req, res, next) {
               }
 
               var plateId = origPlateNumber
+              var plateAllNumber = ''
               var plateNumber = ''
               var plateColor = ''
               var plateMatches = origPlateNumber.match(/^(黄|蓝)(.*)$/)
@@ -138,7 +139,8 @@ router.post('/import', function (req, res, next) {
                 plateId = plateMatches[2]
                 var plateIdMatches = plateId.match(/\d/g)
                 if (plateIdMatches) {
-                  plateNumber = plateIdMatches.join('').substr(-3)
+                  plateAllNumber = plateIdMatches.join('')
+                  plateNumber = plateAllNumber.substr(-3)
                 }
               }
 
@@ -160,7 +162,8 @@ router.post('/import', function (req, res, next) {
                 payType: getValue(sheet, 'M', n), // 车情
                 situation: getValue(sheet, 'N', n), // 特情
                 plateId: plateId, // 车牌照
-                plateNumber: plateNumber, // 车牌照数字
+                plateAllNumber: plateAllNumber, // 车牌照数字
+                plateNumber: plateNumber, // 车牌照数字后三位
                 plateColor: plateColor, // 车牌颜色
                 autoPlateNumber: getValue(sheet, 'P', n), // 自动车牌
                 totalWeight: getValue(sheet, 'Q', n), // 总重

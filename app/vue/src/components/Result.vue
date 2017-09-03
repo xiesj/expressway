@@ -72,12 +72,16 @@
               this.list = resp.data.list
             } else {
               this.$vux.toast.text('您输入的数字24小时内无相关记录')
-              this.$router.push('/search')
+              setTimeout(() => {
+                this.$router.push('/search')
+              }, 3000)
             }
           })
         } else {
           this.$vux.toast.text('请输入车牌所有数字中的后三位')
-          this.$router.push('/search')
+          setTimeout(() => {
+            this.$router.push('/search')
+          }, 3000)
         }
       }
     },
@@ -87,6 +91,12 @@
       } else {
         this.$router.push('/search')
       }
+
+      document.addEventListener('backbutton', () => {
+        if (this.$route.path.indexOf('/result') === 0) {
+          this.$router.push('/search')
+        }
+      }, false)
     }
   }
 </script>
