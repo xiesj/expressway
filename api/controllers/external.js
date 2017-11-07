@@ -54,7 +54,7 @@ router.post('/confirm', function (req, res, next) {
 
   var confirmAt = Date.now()
 
-  External.update({_id: req.body.id}, {confirmBy: req.session.user.name, confirmAt: confirmAt}).sort({operationTime: -1}).limit(30)
+  External.update({_id: req.body.id}, {confirmBy: req.session.user.name, confirmAt: confirmAt})
     .then(function (result) {
       result.confirmBy = req.session.user.name
       result.confirmAt = confirmAt
@@ -82,19 +82,32 @@ router.post('/list', function (req, res, next) {
       searchCondition.plateId = req.body.plate
     }
   }
-
-  const limit = 20
-  var skip = 0
-  if (req.body.page) {
-    skip = (parseInt(req.body.page) - 1) * limit
+  if (req.body.confirmed) {
+    searchCondition.confirmBy = {
+      '$ne': null
+    }
   }
 
   var aggregates = [
     {'$match': searchCondition},
-    {'$sort': { 'operationTime': -1 }},
-    {'$skip': skip},
-    {'$limit': limit}
+    {'$sort': { 'operationTime': -1 }}
   ]
+
+  var limit = 20
+  if (req.body.limit) {
+    if (req.body.limit !== 'all') {
+      limit = req.body.limit
+      aggregates.push({'$limit': limit})
+    }
+  } else {
+    aggregates.push({'$limit': limit})
+  }
+
+  var skip = 0
+  if (req.body.page) {
+    skip = (parseInt(req.body.page) - 1) * limit
+    aggregates.push({'$skip': skip})
+  }
 
   var total = 0
   External.count(searchCondition)

@@ -3,7 +3,7 @@
     <div class="action-bar">
       <el-row>
         <el-col :span="6">
-          <el-upload class="pull-left" ref="import" :action="externalImportUrl" :with-credentials="true" :auto-upload="true" :show-file-list="false"
+          <el-upload ref="import" :action="externalImportUrl" :with-credentials="true" :auto-upload="true" :show-file-list="false"
                      :on-success="importSuccess">
             <el-button slot="trigger" type="info" icon="upload">导入外部数据</el-button>
           </el-upload>
@@ -11,8 +11,10 @@
         <el-col :span="12">
           <el-date-picker class="search-date" v-model="searchDate" @change="handleSearch" type="date" placeholder="选择操作日期"></el-date-picker>
           <el-input class="search-plate" placeholder="输入车牌号数字后三位" icon="search" v-model="searchPlate" @change="handleSearch" :on-icon-click="handleSearch"></el-input>
+          <el-checkbox class="search-confirmed" v-model="searchConfirmed" @change="handleSearch">搜索已确认数据</el-checkbox>
         </el-col>
-        <el-col :span="6"></el-col>
+        <el-col :span="6">
+        </el-col>
       </el-row>
     </div>
     <el-table class="data-table" :data="list" :height="550" :width="1190" v-loading.body="loading" border>
@@ -97,31 +99,53 @@
       </el-table-column>
       <el-table-column prop="enterStation" label="入口站"></el-table-column>
       <el-table-column prop="exitStation" label="出口站"></el-table-column>
-      <el-table-column prop="category" label="货物种类"></el-table-column>
-      <el-table-column prop="freeAmount" label="免费金额"></el-table-column>
-      <el-table-column prop="operator" label="验货员"></el-table-column>
+      <el-table-column prop="category" width="100" label="货物"></el-table-column>
+      <el-table-column prop="freeAmount" width="100" label="金额"></el-table-column>
+      <el-table-column prop="confirmAt" label="确认时间">
+        <template scope="scope">
+          <span v-if="scope.row.confirmAt">{{ scope.row.confirmAt | date }}</span>
+          <span v-else="">未确认</span>
+        </template>
+      </el-table-column>
+      <el-table-column prop="confirmBy" width="100" label="确认人"></el-table-column>
     </el-table>
-    <el-pagination class="pagination"
-      @current-change="handleCurrentChange"
-      :current-page="page"
-      :page-size="20"
-      layout="total, prev, pager, next, jumper"
-      :total="total">
-    </el-pagination>
+    <div class="footer">
+      <el-pagination class="pagination"
+                     @current-change="handleCurrentChange"
+                     :current-page="page"
+                     :page-size="20"
+                     layout="total, prev, pager, next, jumper"
+                     :total="total">
+      </el-pagination>
+      <div class="download">
+        <el-button class="download-btn" size="small" type="info" @click="exportPage">导出本页</el-button>
+        <el-button v-if="total < 1000" class="download-btn" size="small" type="info" @click="exportAll">导出全部</el-button>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
+  import fs from 'fs'
+  import moment from 'moment'
+  import xlsx from 'node-xlsx'
   import Config from '../config'
+  import ElCheckbox from '../../../node_modules/element-ui/packages/checkbox/src/checkbox'
+
+  const { dialog } = require('electron').remote
+
   export default {
+    components: {ElCheckbox},
     data () {
       return {
         externalImportUrl: Config.api + '/external/import',
         searchDate: '',
         searchPlate: '',
+        searchConfirmed: false,
         loading: false,
         list: [],
         total: 0,
+        limit: 20,
         page: 1,
         editFormDialogVisible: false,
         editFormLabelWidth: '50px',
@@ -139,9 +163,11 @@
       loadList () {
         this.loading = true
         this.$http.post(Config.api + '/external/list', {
+          limit: this.limit,
           page: this.page,
           date: this.searchDate,
-          plate: this.searchPlate
+          plate: this.searchPlate,
+          confirmed: this.searchConfirmed
         })
           .then(resp => {
             this.list = resp.data.list
@@ -170,11 +196,12 @@
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          console.log('delete user', row._id)
+          this.loading = true
           this.$http.delete(Config.api + '/users/' + row._id)
             .then(resp => {
               this.users.splice(index, 1)
               this.$message.success('删除成功!')
+              this.loading = false
             })
             .catch(() => {
               this.$message.error('删除失败!')
@@ -198,6 +225,97 @@
           this.$message.error('数据导入异常, 请检查文件格式或联系管理员!')
         }
         this.loadList()
+      },
+      exportPage () {
+        var data = [['车牌', '操作时间', '入口站', '出口站', '货物', '金额', '确认时间', '确认人']]
+        this.list.forEach(row => {
+          data.push([
+            row.plateId,
+            moment(row.operationTime).format('YYYY-MM-DD HH:mm'),
+            row.enterStation,
+            row.exitStation,
+            row.category,
+            row.freeAmount,
+            row.confirmAt ? moment(row.confirmAt).format('YYYY-MM-DD HH:mm') : '',
+            row.confirmBy])
+        })
+
+        var fileName = '搜索结果'
+        if (this.searchConfirmed) {
+          fileName = '确认记录'
+        }
+        if (this.searchPlate) {
+          fileName += '-' + this.searchPlate
+        }
+        if (this.searchDate) {
+          fileName += '-' + moment(this.searchDate).format('YYYYMMDD')
+        }
+        fileName += '-' + this.page
+
+        fileName += '.xlsx'
+
+        var buffer = xlsx.build([{data: data}])
+
+        dialog.showSaveDialog({
+          defaultPath: fileName
+        }, filePath => {
+          if (filePath) {
+            fs.writeFile(filePath, buffer, err => {
+              if (err) throw err
+              this.$message.success('导出成功!')
+            })
+          }
+        })
+      },
+      exportAll () {
+        this.loading = true
+        this.$http.post(Config.api + '/external/list', {
+          limit: 'all',
+          date: this.searchDate,
+          plate: this.searchPlate,
+          confirmed: this.searchConfirmed
+        })
+          .then(resp => {
+            this.loading = false
+            var data = [['车牌', '操作时间', '入口站', '出口站', '货物', '金额', '确认时间', '确认人']]
+            resp.data.list.forEach(row => {
+              data.push([
+                row.plateId,
+                moment(row.operationTime).format('YYYY-MM-DD HH:mm'),
+                row.enterStation,
+                row.exitStation,
+                row.category,
+                row.freeAmount,
+                row.confirmAt ? moment(row.confirmAt).format('YYYY-MM-DD HH:mm') : '',
+                row.confirmBy])
+            })
+
+            var fileName = '搜索结果'
+            if (this.searchConfirmed) {
+              fileName = '确认记录'
+            }
+            if (this.searchPlate) {
+              fileName += '-' + this.searchPlate
+            }
+            if (this.searchDate) {
+              fileName += '-' + moment(this.searchDate).format('YYYYMMDD')
+            }
+
+            fileName += '.xlsx'
+
+            var buffer = xlsx.build([{data: data}])
+
+            dialog.showSaveDialog({
+              defaultPath: fileName
+            }, filePath => {
+              if (filePath) {
+                fs.writeFile(filePath, buffer, err => {
+                  if (err) throw err
+                  this.$message.success('导出成功!')
+                })
+              }
+            })
+          })
       }
     },
     mounted () {

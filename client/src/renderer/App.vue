@@ -37,11 +37,23 @@
     margin-left: 10px;
     width: 200px;
   }
+  .search-confirmed {
+    margin-left: 10px;
+  }
   .data-table {
     width: 1190px;
     height: 584px;
   }
-  .pagination {
+  .footer {
     margin-top: 5px;
+  }
+  .pagination {
+    float: left;
+  }
+  .download {
+    float: right;
+  }
+  .download-btn {
+    margin-left: 5px;
   }
 </style>

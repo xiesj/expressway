@@ -21,7 +21,7 @@ module.exports = (function () {
     importSheetName: {type: String}, // 表名
     importTime: {type: Date, default: Date.now}, // 数据导入时间
     confirmBy: {type: String}, // 确认人
-    confirmAt: {type: Date, default: Date.now} // 确认时间
+    confirmAt: {type: Date} // 确认时间
   }
   return mongoose.model('external', mongoose.Schema(schema))
 })()
