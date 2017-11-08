@@ -94,34 +94,36 @@ router.post('/list', function (req, res, next) {
   ]
 
   var limit = 20
+  var skip = 0
   if (req.body.limit) {
-    if (req.body.limit !== 'all') {
-      limit = req.body.limit
+    if (req.body.limit === 'all') {
+
+    } else {
+      limit = parseInt(req.body.limit)
+      if (req.body.page) {
+        skip = (parseInt(req.body.page) - 1) * limit
+      }
+      aggregates.push({'$skip': skip})
       aggregates.push({'$limit': limit})
     }
   } else {
-    aggregates.push({'$limit': limit})
-  }
-
-  var skip = 0
-  if (req.body.page) {
-    skip = (parseInt(req.body.page) - 1) * limit
     aggregates.push({'$skip': skip})
+    aggregates.push({'$limit': limit})
   }
 
   var total = 0
   External.count(searchCondition)
-    .then(function (count) {
+    .then(count => {
       total = count
       return External.aggregate(aggregates).exec()
     })
-    .then(function (result) {
+    .then(result => {
       return res.send({
         list: result,
         total: total
       })
     })
-    .then(null, function (err) {
+    .then(null, err => {
       return res.send({
         'error': err
       })
