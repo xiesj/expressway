@@ -3,20 +3,30 @@ var config = require('./config')
 
 mongoose.Promise = require('bluebird')
 
-mongoose.connect(config.dbPath, {
-  server: {
-    auto_reconnect: true,
-    poolSize: 10
-  }
-})
-var db = mongoose.connection
+/**
+ * 连接
+ */
+mongoose.connect(config.dbPath)
 
-db.on('error', function () {
-  console.log('error occured from db')
-})
-
-db.once('open', function () {
-  console.log('mongodb connected')
+/**
+ * 连接成功
+ */
+mongoose.connection.on('connected', function () {
+  console.log('Mongoose connection open to ' + config.dbPath)
 })
 
-exports.mongoose = mongoose
+/**
+ * 连接异常
+ */
+mongoose.connection.on('error', function (err) {
+  console.log('Mongoose connection error: ' + err)
+})
+
+/**
+ * 连接断开
+ */
+mongoose.connection.on('disconnected', function () {
+  console.log('Mongoose connection disconnected')
+})
+
+module.exports = mongoose

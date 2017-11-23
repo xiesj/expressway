@@ -3,7 +3,7 @@ const session = require('express-session')
 const MongoStore = require('connect-mongo')(session)
 const Router = require('restify-router').Router
 const config = require('./config')
-const mongoose = require('./db').mongoose
+const mongoose = require('./db')
 
 const router = new Router()
 
