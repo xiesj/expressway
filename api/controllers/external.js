@@ -69,8 +69,18 @@ router.post('/confirm', function (req, res, next) {
 
 router.post('/list', function (req, res, next) {
   var searchCondition = {}
+  var dateType = req.body.dateType
+  var sort = {}
+  if (dateType === 'confirmAt') {
+    sort = { 'operationTime': -1 }
+  } else {
+    sort = { 'operationTime': -1 }
+    dateType = 'operationTime'
+  }
+  sort[dateType] = -1
+
   if (req.body.date) {
-    searchCondition.operationTime = {
+    searchCondition[dateType] = {
       '$gte': moment(req.body.date).startOf('day'),
       '$lt': moment(req.body.date).endOf('day')
     }
@@ -90,7 +100,7 @@ router.post('/list', function (req, res, next) {
 
   var aggregates = [
     {'$match': searchCondition},
-    {'$sort': { 'operationTime': -1 }}
+    {'$sort': sort}
   ]
 
   var limit = 20

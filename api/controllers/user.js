@@ -66,6 +66,7 @@ router.post('/add', function (req, res, next) {
   var user = {
     id: req.body.id,
     name: req.body.name,
+    team: req.body.team,
     age: req.body.age,
     phone: req.body.phone,
     password: req.body.password
@@ -111,6 +112,7 @@ router.put('/update', function (req, res, next) {
       }
       var updateQuery = {
         id: req.body.id,
+        team: req.body.team,
         name: req.body.name,
         age: req.body.age,
         phone: req.body.phone

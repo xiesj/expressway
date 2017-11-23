@@ -47,3 +47,15 @@ Vue.filter('diffHourColor', function (date) {
     return 'danger'
   }
 })
+
+Vue.filter('distanceHour', function (date, date2) {
+  var diffHours = moment(date2).diff(moment(date), 'hour')
+  return diffHours + '小时'
+})
+
+Vue.filter('distanceHourShow', function (date, date2) {
+  var diffHours = moment(date2).diff(moment(date), 'hour')
+  if (diffHours < 6) {
+    return 'display: none'
+  }
+})

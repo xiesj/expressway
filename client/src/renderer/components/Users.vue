@@ -10,6 +10,7 @@
     <el-table class="data-table" :data="users" :height="584" border>
       <el-table-column prop="id" label="工号"></el-table-column>
       <el-table-column prop="name" label="姓名"></el-table-column>
+      <el-table-column prop="team" label="班组"></el-table-column>
       <el-table-column label="操作">
         <template scope="scope">
           <el-button-group>
@@ -28,11 +29,8 @@
         <el-form-item label="姓名" :label-width="editFormLabelWidth">
           <el-input v-model="editForm.name" auto-complete="off"></el-input>
         </el-form-item>
-        <el-form-item label="年龄" :label-width="editFormLabelWidth">
-          <el-input v-model="editForm.age" auto-complete="off"></el-input>
-        </el-form-item>
-        <el-form-item label="电话" :label-width="editFormLabelWidth">
-          <el-input v-model="editForm.phone" auto-complete="off"></el-input>
+        <el-form-item label="班组" :label-width="editFormLabelWidth">
+          <el-input v-model="editForm.team" auto-complete="off"></el-input>
         </el-form-item>
         <el-form-item label="密码" :label-width="editFormLabelWidth">
           <el-input v-model="editForm.password" auto-complete="off"></el-input>
@@ -58,6 +56,7 @@
           _id: '',
           id: '',
           name: '',
+          team: '',
           age: '',
           phone: '',
           password: ''

@@ -3,6 +3,7 @@ module.exports = (function () {
   var schema = {
     id: {type: String, required: true, index: {unique: true}},
     name: {type: String, required: true},
+    team: {type: String},
     age: {type: String},
     phone: {type: String},
     password: {type: String},

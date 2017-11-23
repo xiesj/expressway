@@ -2,18 +2,24 @@
   <div>
     <div class="action-bar">
       <el-row>
-        <el-col :span="6">
-          <el-upload ref="import" :action="externalImportUrl" :with-credentials="true" :auto-upload="true" :show-file-list="false"
+        <el-col :span="4">
+          <el-upload class="pull-left" ref="import" :action="externalImportUrl" :with-credentials="true" :auto-upload="true" :show-file-list="false"
                      :on-success="importSuccess">
             <el-button slot="trigger" type="info" icon="upload">导入外部数据</el-button>
           </el-upload>
         </el-col>
-        <el-col :span="12">
-          <el-date-picker class="search-date" v-model="searchDate" @change="handleSearch" type="date" placeholder="选择操作日期"></el-date-picker>
+        <el-col :span="20">
+          <el-select v-model="searchDateType" @change="handleSearch" placeholder="请选择日期类型">
+            <el-option
+              v-for="item in searchDateTypeOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value">
+            </el-option>
+          </el-select>
+          <el-date-picker class="search-date" v-model="searchDate" @change="handleSearch" type="date" placeholder="选择日期"></el-date-picker>
           <el-input class="search-plate" placeholder="输入车牌号数字后三位" icon="search" v-model="searchPlate" @change="handleSearch" :on-icon-click="handleSearch"></el-input>
           <el-checkbox class="search-confirmed" v-model="searchConfirmed" @change="handleSearch">搜索已确认数据</el-checkbox>
-        </el-col>
-        <el-col :span="6">
         </el-col>
       </el-row>
     </div>
@@ -100,10 +106,13 @@
       <el-table-column prop="enterStation" label="入口站"></el-table-column>
       <el-table-column prop="exitStation" label="出口站"></el-table-column>
       <el-table-column prop="category" width="100" label="货物"></el-table-column>
-      <el-table-column prop="freeAmount" width="100" label="金额"></el-table-column>
-      <el-table-column prop="confirmAt" label="确认时间">
+      <el-table-column prop="freeAmount" width="80" label="金额"></el-table-column>
+      <el-table-column prop="confirmAt" width="220" label="确认时间">
         <template scope="scope">
-          <span v-if="scope.row.confirmAt">{{ scope.row.confirmAt | date }}</span>
+          <div v-if="scope.row.confirmAt">
+            {{ scope.row.confirmAt | date }}
+            <el-tag type="danger" v-bind:style="scope.row.operationTime | distanceHourShow(scope.row.confirmAt)">{{ scope.row.operationTime | distanceHour(scope.row.confirmAt) }}</el-tag>
+          </div>
           <span v-else="">未确认</span>
         </template>
       </el-table-column>
@@ -140,6 +149,14 @@
       return {
         externalImportUrl: Config.api + '/external/import',
         searchDate: '',
+        searchDateTypeOptions: [{
+          value: 'operationTime',
+          label: '操作时间'
+        }, {
+          value: 'confirmAt',
+          label: '确认时间'
+        }],
+        searchDateType: 'operationTime',
         searchPlate: '',
         searchConfirmed: false,
         loading: false,
@@ -165,6 +182,7 @@
         this.$http.post(Config.api + '/external/list', {
           limit: this.limit,
           page: this.page,
+          dateType: this.searchDateType,
           date: this.searchDate,
           plate: this.searchPlate,
           confirmed: this.searchConfirmed
@@ -227,8 +245,9 @@
         this.loadList()
       },
       exportPage () {
-        var data = [['车牌', '操作时间', '入口站', '出口站', '货物', '金额', '确认时间', '确认人']]
+        var data = [['车牌', '操作时间', '入口站', '出口站', '货物', '金额', '确认时间', '确认人', '间隔时间']]
         this.list.forEach(row => {
+          var distanceHour = moment(row.confirmAt).diff(moment(row.operationTime), 'hour')
           data.push([
             row.plateId,
             moment(row.operationTime).format('YYYY-MM-DD HH:mm'),
@@ -237,7 +256,9 @@
             row.category,
             row.freeAmount,
             row.confirmAt ? moment(row.confirmAt).format('YYYY-MM-DD HH:mm') : '',
-            row.confirmBy])
+            row.confirmBy,
+            row.confirmAt && distanceHour >= 6 ? distanceHour + '小时' : ''
+          ])
         })
 
         var fileName = '搜索结果'
@@ -271,14 +292,16 @@
         this.loading = true
         this.$http.post(Config.api + '/external/list', {
           limit: 'all',
+          dateType: this.searchDateType,
           date: this.searchDate,
           plate: this.searchPlate,
           confirmed: this.searchConfirmed
         })
           .then(resp => {
             this.loading = false
-            var data = [['车牌', '操作时间', '入口站', '出口站', '货物', '金额', '确认时间', '确认人']]
+            var data = [['车牌', '操作时间', '入口站', '出口站', '货物', '金额', '确认时间', '确认人', '间隔时间']]
             resp.data.list.forEach(row => {
+              var distanceHour = moment(row.confirmAt).diff(moment(row.operationTime), 'hour')
               data.push([
                 row.plateId,
                 moment(row.operationTime).format('YYYY-MM-DD HH:mm'),
@@ -287,7 +310,9 @@
                 row.category,
                 row.freeAmount,
                 row.confirmAt ? moment(row.confirmAt).format('YYYY-MM-DD HH:mm') : '',
-                row.confirmBy])
+                row.confirmBy,
+                row.confirmAt && distanceHour >= 6 ? distanceHour + '小时' : ''
+              ])
             })
 
             var fileName = '搜索结果'
